@@ -1,40 +1,35 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
 
-from core.database import get_db
-from schemas import schemas
-from services.service import RecursoService
+@router.get("/health")
+def health_check():
+    return {"status": "ok", "message": "API operacional"}
 
-from services.ai_service import SmartAssistService
+@router.get("/recursos/", response_model=list[schemas.RecursoResponse])
+def listar_recursos(skip: int = Query(0, ge=0), limit: int = Query(10, le=100), db: Session = Depends(get_db)):
 
-router = APIRouter(prefix="/recursos", tags=["Recursos"])
+    recursos = db.query(models.Recurso).offset(skip).limit(limit).all()
+    return recursos
 
-@router.post("/", response_model=schemas.RecursoResponse)
-def criar_recurso(recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
-    service = RecursoService(db)
-    return service.criar_recurso(recurso)
+@router.put("/recursos/{recurso_id}", response_model=schemas.RecursoResponse)
+def atualizar_recurso(recurso_id: int, recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
+    db_recurso = db.query(models.Recurso).filter(models.Recurso.id == recurso_id).first()
+    if not db_recurso:
+        raise HTTPException(status_code=404, detail="Recurso não encontrado")
 
-@router.get("/", response_model=List[schemas.RecursoResponse])
-def listar_recursos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    service = RecursoService(db)
-    return service.listar_recursos(skip, limit)
+    for key, value in recurso.model_dump().items():
+        setattr(db_recurso, key, value)
+        
+    db.commit()
+    db.refresh(db_recurso)
+    return db_recurso
 
-@router.put("/{recurso_id}", response_model=schemas.RecursoResponse)
-def atualizar_recurso(recurso_id: int, recurso_atualizado: schemas.RecursoCreate, db: Session = Depends(get_db)):
-    service = RecursoService(db)
-    return service.atualizar_recurso(recurso_id, recurso_atualizado)
-
-@router.delete("/{recurso_id}")
-def deletar_recurso(recurso_id: int, db: Session = Depends(get_db)):
-    service = RecursoService(db)
-    return service.deletar_recurso(recurso_id)
-
-@router.post("/smart-assist", response_model=schemas.SmartAssistResponse)
-def gerar_sugestoes_ia(request: schemas.SmartAssistRequest):
-
-    ai_service = SmartAssistService()
-    
-    resultado = ai_service.gerar_sugestoes(titulo=request.titulo, tipo=request.tipo)
-    
-    return resultado
+@router.delete("/recursos/{recurso_id}")
+def excluir_recurso(recurso_id: int, db: Session = Depends(get_db)):
+    db_recurso = db.query(models.Recurso).filter(models.Recurso.id == recurso_id).first()
+    if not db_recurso:
+        raise HTTPException(status_code=404, detail="Recurso não encontrado")
+        
+    db.delete(db_recurso)
+    db.commit()
+    return {"mensagem": "Recurso excluído com sucesso"}
