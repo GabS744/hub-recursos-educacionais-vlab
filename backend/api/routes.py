@@ -1,13 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+import models
+from api import schemas
+from core.database import get_db
+from services.ai_service import SmartAssistService
+
+router = APIRouter()
+
 @router.get("/health")
 def health_check():
     return {"status": "ok", "message": "API operacional"}
 
+@router.post("/recursos/", response_model=schemas.RecursoResponse)
+def criar_recurso(recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
+    db_recurso = models.Recurso(**recurso.model_dump())
+    db.add(db_recurso)
+    db.commit()
+    db.refresh(db_recurso)
+    return db_recurso
+
 @router.get("/recursos/", response_model=list[schemas.RecursoResponse])
 def listar_recursos(skip: int = Query(0, ge=0), limit: int = Query(10, le=100), db: Session = Depends(get_db)):
-
     recursos = db.query(models.Recurso).offset(skip).limit(limit).all()
     return recursos
 
@@ -33,3 +47,9 @@ def excluir_recurso(recurso_id: int, db: Session = Depends(get_db)):
     db.delete(db_recurso)
     db.commit()
     return {"mensagem": "Recurso excluído com sucesso"}
+
+@router.post("/recursos/smart-assist", response_model=schemas.SmartAssistResponse)
+def gerar_sugestoes_ia(request: schemas.SmartAssistRequest):
+    ai_service = SmartAssistService()
+    resultado = ai_service.gerar_sugestoes(titulo=request.titulo, tipo=request.tipo)
+    return resultado
