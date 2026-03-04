@@ -20,52 +20,54 @@ function CardFeatures({ titulo, tipo, descricao, url, tags = [] }) {
   };
 
   return (
-    <div className="bg-white w-1/4 flex flex-col justify-between p-5 rounded-xl border border-gray-100 shadow-sm space-y-3 hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start">
-        <div className="bg-blue-50 w-max flex justify-center items-center rounded-full gap-2 px-3 py-1">
-          {getIconeTipo()}
-          <p className="text-blue-600 font-semibold text-xs capitalize tracking-wider">
-            {tipo}
+    <div className="bg-white h-80 flex flex-col justify-between p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="space-y-3">
+        <div className="flex justify-between items-start">
+          <div className="bg-blue-50 w-max flex justify-center items-center rounded-full gap-2 px-3 py-1">
+            {getIconeTipo()}
+            <p className="text-blue-600 font-semibold text-xs capitalize tracking-wider">
+              {tipo}
+            </p>
+          </div>
+
+          <div className="flex gap-2 text-gray-400">
+            <button className="hover:text-blue-600 transition-colors">
+              <Pencil size={18} />
+            </button>
+            <button className="hover:text-red-600 transition-colors">
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <h1 className="text-gray-900 text-lg font-semibold leading-tight line-clamp-2">
+            {titulo}
+          </h1>
+
+          <p className="text-gray-500 font-normal text-sm line-clamp-3">
+            {descricao}
           </p>
         </div>
 
-        <div className="flex gap-2 text-gray-400">
-          <button className="hover:text-blue-600 transition-colors">
-            <Pencil size={18} />
-          </button>
-          <button className="hover:text-red-600 transition-colors">
-            <Trash2 size={18} />
-          </button>
+        <div className="flex flex-row gap-1 items-center pt-1">
+          <ExternalLink size={16} className="text-blue-600 shrink-0" />
+          <a
+            className="text-blue-600 hover:underline text-sm font-medium truncate"
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {url}
+          </a>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <h1 className="text-gray-900 text-lg font-semibold leading-tight">
-          {titulo}
-        </h1>
-
-        <p className="text-gray-500 font-normal text-sm line-clamp-3">
-          {descricao}
-        </p>
-      </div>
-
-      <div className="flex flex-row gap-1 items-center pt-2">
-        <ExternalLink size={16} className="text-blue-600" />
-        <a
-          className="text-blue-600 hover:underline text-sm font-medium truncate"
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {url}
-        </a>
-      </div>
-
-      <div className="flex flex-wrap gap-2 pt-3">
+      <div className="flex flex-wrap gap-2 pt-3 h-14 overflow-hidden items-end">
         {tags.map((tag, index) => (
           <span
             key={index}
-            className="bg-slate-100 text-slate-600 rounded-full px-3 py-1 text-xs font-medium"
+            className="bg-slate-100 text-slate-600 rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap"
           >
             {tag}
           </span>

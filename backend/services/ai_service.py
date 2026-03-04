@@ -31,8 +31,7 @@ class SmartAssistService:
                 contents=prompt,
             )
             latency = time.time() - start_time
-            
-            # Log estruturado exigido no desafio
+
             logger.info(f'[INFO] AI Request: Title="{titulo}", Latency={latency:.2f}s, Status="Success"')
             
             texto_limpo = response.text.replace('```json', '').replace('```', '').strip()
