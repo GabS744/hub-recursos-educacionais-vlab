@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-import models
-from api import schemas
+from models import models
+from schemas import schemas
 from core.database import get_db
 from services.ai_service import SmartAssistService
 
