@@ -9,8 +9,7 @@ router = APIRouter()
 
 @router.get("/health")
 def health_check():
-    return {"status": "ok", "message": "API operacional", "version": "1.0.0" }
-    
+    return {"status": "ok", "message": "API operacional", "version": "1.0.0"}
 
 @router.post("/recursos/", response_model=schemas.RecursoResponse)
 def criar_recurso(recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
@@ -32,10 +31,12 @@ def listar_recursos(
 @router.put("/recursos/{recurso_id}", response_model=schemas.RecursoResponse)
 def atualizar_recurso(recurso_id: int, recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
     db_recurso = db.query(models.Recurso).filter(models.Recurso.id == recurso_id).first()
+    
     if not db_recurso:
         raise HTTPException(status_code=404, detail="Recurso não encontrado")
 
-    for key, value in recurso.model_dump().items():
+    update_data = recurso.model_dump()
+    for key, value in update_data.items():
         setattr(db_recurso, key, value)
         
     db.commit()
@@ -45,6 +46,7 @@ def atualizar_recurso(recurso_id: int, recurso: schemas.RecursoCreate, db: Sessi
 @router.delete("/recursos/{recurso_id}")
 def excluir_recurso(recurso_id: int, db: Session = Depends(get_db)):
     db_recurso = db.query(models.Recurso).filter(models.Recurso.id == recurso_id).first()
+    
     if not db_recurso:
         raise HTTPException(status_code=404, detail="Recurso não encontrado")
         
