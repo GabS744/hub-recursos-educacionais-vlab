@@ -7,9 +7,17 @@ import {
   Trash2,
 } from "lucide-react";
 
-function CardFeatures({ titulo, tipo, descricao, url, tags = [] }) {
-  const getIconeTipo = () => {
-    switch (tipo?.toLowerCase()) {
+function CardFeatures({
+  title,
+  type,
+  description,
+  url,
+  tags = [],
+  onEdit,
+  onDelete,
+}) {
+  const getTypeIcon = () => {
+    switch (type?.toLowerCase()) {
       case "pdf":
         return <FileText size={18} className="text-red-500" />;
       case "link":
@@ -24,17 +32,23 @@ function CardFeatures({ titulo, tipo, descricao, url, tags = [] }) {
       <div className="space-y-3">
         <div className="flex justify-between items-start">
           <div className="bg-blue-50 w-max flex justify-center items-center rounded-full gap-2 px-3 py-1">
-            {getIconeTipo()}
+            {getTypeIcon()}
             <p className="text-blue-600 font-semibold text-xs capitalize tracking-wider">
-              {tipo}
+              {type}
             </p>
           </div>
 
           <div className="flex gap-2 text-gray-400">
-            <button className="hover:text-blue-600 transition-colors">
+            <button
+              onClick={onEdit}
+              className="hover:text-blue-600 transition-colors"
+            >
               <Pencil size={18} />
             </button>
-            <button className="hover:text-red-600 transition-colors">
+            <button
+              onClick={onDelete}
+              className="hover:text-red-600 transition-colors"
+            >
               <Trash2 size={18} />
             </button>
           </div>
@@ -42,11 +56,11 @@ function CardFeatures({ titulo, tipo, descricao, url, tags = [] }) {
 
         <div className="space-y-1">
           <h1 className="text-gray-900 text-lg font-semibold leading-tight line-clamp-2">
-            {titulo}
+            {title}
           </h1>
 
           <p className="text-gray-500 font-normal text-sm line-clamp-3">
-            {descricao}
+            {description}
           </p>
         </div>
 
