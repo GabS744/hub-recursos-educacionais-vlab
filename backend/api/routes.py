@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-
 from models import models
 from schemas import schemas
 from core.database import get_db
@@ -21,7 +20,11 @@ def criar_recurso(recurso: schemas.RecursoCreate, db: Session = Depends(get_db))
     return db_recurso
 
 @router.get("/recursos/", response_model=list[schemas.RecursoResponse])
-def listar_recursos(skip: int = Query(0, ge=0), limit: int = Query(10, le=100), db: Session = Depends(get_db)):
+def listar_recursos(
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(6, le=100), 
+    db: Session = Depends(get_db)
+):
     recursos = db.query(models.Recurso).offset(skip).limit(limit).all()
     return recursos
 

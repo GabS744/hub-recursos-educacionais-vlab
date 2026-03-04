@@ -1,23 +1,28 @@
 import { useState, useEffect } from "react";
 import api from "./services/api";
 import "./App.css";
-
 import CardFeatures from "./components/CardFeatures";
 import NewResourceModal from "./components/NewResourceModal";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function App() {
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 6;
 
   const fetchResources = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/recursos/");
+      const skip = currentPage * itemsPerPage;
+      const response = await api.get(
+        `/recursos/?skip=${skip}&limit=${itemsPerPage}`,
+      );
       setResources(response.data);
     } catch (error) {
-      console.error("Erro ao conectar com o backend:", error);
+      console.error("Error connecting to backend:", error);
     } finally {
       setIsLoading(false);
     }
@@ -25,7 +30,7 @@ function App() {
 
   useEffect(() => {
     fetchResources();
-  }, []);
+  }, [currentPage]);
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
@@ -36,7 +41,7 @@ function App() {
         await api.delete(`/recursos/${id}`);
         fetchResources();
       } catch (error) {
-        console.error("Erro ao excluir recurso:", error);
+        console.error("Error deleting resource:", error);
         alert("Falha ao excluir o recurso.");
       }
     }
@@ -69,31 +74,57 @@ function App() {
       {isLoading ? (
         <p className="text-white">Carregando recursos...</p>
       ) : (
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resources.length > 0 ? (
-            resources.map((resource) => {
-              const tagsList =
-                typeof resource.tags === "string"
-                  ? resource.tags.split(",").map((tag) => tag.trim())
-                  : resource.tags;
+        <>
+          <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resources.length > 0 ? (
+              resources.map((resource) => {
+                const tagsList =
+                  typeof resource.tags === "string"
+                    ? resource.tags.split(",").map((tag) => tag.trim())
+                    : resource.tags;
 
-              return (
-                <CardFeatures
-                  key={resource.id}
-                  title={resource.titulo}
-                  type={resource.tipo}
-                  description={resource.descricao}
-                  url={resource.url}
-                  tags={tagsList}
-                  onEdit={() => handleEdit({ ...resource, tags: tagsList })}
-                  onDelete={() => handleDelete(resource.id)}
-                />
-              );
-            })
-          ) : (
-            <p className="text-gray-400">Nenhum recurso cadastrado ainda.</p>
-          )}
-        </div>
+                return (
+                  <CardFeatures
+                    key={resource.id}
+                    title={resource.titulo}
+                    type={resource.tipo}
+                    description={resource.descricao}
+                    url={resource.url}
+                    tags={tagsList}
+                    onEdit={() => handleEdit({ ...resource, tags: tagsList })}
+                    onDelete={() => handleDelete(resource.id)}
+                  />
+                );
+              })
+            ) : (
+              <p className="text-gray-400">
+                Nenhum recurso encontrado nesta página.
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4 mt-12">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
+              className="p-2 rounded-full bg-slate-800 text-white disabled:opacity-30 hover:bg-slate-700 transition"
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            <span className="text-white font-medium">
+              Página {currentPage + 1}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={resources.length < itemsPerPage}
+              className="p-2 rounded-full bg-slate-800 text-white disabled:opacity-30 hover:bg-slate-700 transition"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
+        </>
       )}
 
       <NewResourceModal
