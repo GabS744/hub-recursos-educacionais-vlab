@@ -4,6 +4,7 @@ import "./App.css";
 import CardFeatures from "./components/CardFeatures";
 import NewResourceModal from "./components/NewResourceModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [resources, setResources] = useState([]);
@@ -22,7 +23,7 @@ function App() {
       );
       setResources(response.data);
     } catch (error) {
-      console.error("Error connecting to backend:", error);
+      toast.error("Erro ao carregar recursos");
     } finally {
       setIsLoading(false);
     }
@@ -33,16 +34,19 @@ function App() {
   }, [currentPage]);
 
   const handleDelete = async (id) => {
+    if (!id) return;
+
     const confirmed = window.confirm(
       "Tem certeza que deseja excluir este recurso?",
     );
+
     if (confirmed) {
       try {
         await api.delete(`/recursos/${id}`);
+        toast.success("Recurso excluído com sucesso!");
         fetchResources();
       } catch (error) {
-        console.error("Error deleting resource:", error);
-        alert("Falha ao excluir o recurso.");
+        toast.error("Falha ao excluir o recurso.");
       }
     }
   };
@@ -59,12 +63,18 @@ function App() {
 
   return (
     <div className="bg-[#12192B] min-h-screen w-full p-10 flex flex-col items-center">
+
+      <Toaster position="top-right" reverseOrder={false} />
+
       <div className="w-full max-w-6xl mb-8 flex justify-between items-center">
         <h1 className="text-white text-3xl font-bold">
           Hub de Recursos Educacionais
         </h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingResource(null);
+            setIsModalOpen(true);
+          }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
         >
           + Novo Recurso
@@ -91,15 +101,13 @@ function App() {
                     description={resource.descricao}
                     url={resource.url}
                     tags={tagsList}
-                    onEdit={() => handleEdit({ ...resource, tags: tagsList })}
+                    onEdit={() => handleEdit(resource)}
                     onDelete={() => handleDelete(resource.id)}
                   />
                 );
               })
             ) : (
-              <p className="text-gray-400">
-                Nenhum recurso encontrado nesta página.
-              </p>
+              <p className="text-gray-400">Nenhum recurso encontrado.</p>
             )}
           </div>
 
@@ -111,11 +119,9 @@ function App() {
             >
               <ChevronLeft size={24} />
             </button>
-
             <span className="text-white font-medium">
               Página {currentPage + 1}
             </span>
-
             <button
               onClick={() => setCurrentPage((prev) => prev + 1)}
               disabled={resources.length < itemsPerPage}
@@ -130,7 +136,12 @@ function App() {
       <NewResourceModal
         isOpen={isModalOpen}
         onClose={closeModal}
-        onResourceCreated={fetchResources}
+        onResourceCreated={() => {
+          fetchResources();
+          toast.success(
+            editingResource ? "Recurso atualizado!" : "Recurso criado!",
+          );
+        }}
         resourceToEdit={editingResource}
       />
     </div>

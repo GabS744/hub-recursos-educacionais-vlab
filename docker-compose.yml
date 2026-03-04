@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: mysql:8.0
@@ -12,6 +14,35 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: hub_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+    environment:
+
+      - DATABASE_URL=mysql+pymysql://hub_user:hub_password@db:3306/hub_educacional
+
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build: ./frontend
+    container_name: hub_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   mysql_data:

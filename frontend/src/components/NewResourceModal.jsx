@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Sparkles, Loader2 } from "lucide-react";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function NewResourceModal({
   isOpen,
@@ -45,7 +46,7 @@ function NewResourceModal({
 
   const handleSmartAssist = async () => {
     if (!formData.titulo) {
-      alert("Por favor, preencha o Título primeiro para a IA ter contexto.");
+      toast.error("Por favor, preencha o Título primeiro para a IA ter contexto.");
       return;
     }
 
@@ -90,7 +91,6 @@ function NewResourceModal({
       onClose();
     } catch (error) {
       console.error("Erro ao salvar recurso:", error);
-      alert("Ocorreu um erro ao tentar salvar. Verifique o console.");
     } finally {
       setIsSaving(false);
     }

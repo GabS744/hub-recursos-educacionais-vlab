@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class SmartAssistService:
     def __init__(self):
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.model = genai.GenerativeModel("gemini-2.5-flash")
 
     def gerar_sugestoes(self, titulo: str, tipo: str):
         start_time = time.time()
