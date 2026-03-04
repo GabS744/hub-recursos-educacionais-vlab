@@ -9,7 +9,8 @@ router = APIRouter()
 
 @router.get("/health")
 def health_check():
-    return {"status": "ok", "message": "API operacional"}
+    return {"status": "ok", "message": "API operacional", "version": "1.0.0" }
+    
 
 @router.post("/recursos/", response_model=schemas.RecursoResponse)
 def criar_recurso(recurso: schemas.RecursoCreate, db: Session = Depends(get_db)):
