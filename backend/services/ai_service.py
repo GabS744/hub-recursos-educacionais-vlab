@@ -35,8 +35,9 @@ class SmartAssistService:
             response = self.model.generate_content(prompt)
 
             latency = round(time.time() - start_time, 2)
+            tokens = response.usage_metadata.total_token_count if hasattr(response, 'usage_metadata') else 0
 
-            logger.info(f"AI Request: Title=\"{titulo}\", Latency={latency}s")
+            logger.info(f'AI Request: Title="{titulo}", TokenUsage={tokens}, Latency={latency}s')
             
             content = response.text.replace('```json', '').replace('```', '').strip()
             return json.loads(content)
