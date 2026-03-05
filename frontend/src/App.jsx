@@ -3,14 +3,20 @@ import api from "./services/api";
 import "./App.css";
 import CardFeatures from "./components/CardFeatures";
 import NewResourceModal from "./components/NewResourceModal";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
+
+  const [resourceToDelete, setResourceToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 6;
 
@@ -33,21 +39,23 @@ function App() {
     fetchResources();
   }, [currentPage]);
 
-  const handleDelete = async (id) => {
-    if (!id) return;
+  const handleDeleteClick = (id) => {
+    setResourceToDelete(id);
+  };
 
-    const confirmed = window.confirm(
-      "Tem certeza que deseja excluir este recurso?",
-    );
+  const confirmDelete = async () => {
+    if (!resourceToDelete) return;
 
-    if (confirmed) {
-      try {
-        await api.delete(`/recursos/${id}`);
-        toast.success("Recurso excluído com sucesso!");
-        fetchResources();
-      } catch (error) {
-        toast.error("Falha ao excluir o recurso.");
-      }
+    setIsDeleting(true);
+    try {
+      await api.delete(`/recursos/${resourceToDelete}`);
+      toast.success("Recurso excluído com sucesso!");
+      fetchResources();
+    } catch (error) {
+      toast.error("Falha ao excluir o recurso.");
+    } finally {
+      setIsDeleting(false);
+      setResourceToDelete(null);
     }
   };
 
@@ -63,7 +71,6 @@ function App() {
 
   return (
     <div className="bg-[#12192B] min-h-screen w-full p-10 flex flex-col items-center">
-
       <Toaster position="top-right" reverseOrder={false} />
 
       <div className="w-full max-w-6xl mb-8 flex justify-between items-center">
@@ -102,7 +109,7 @@ function App() {
                     url={resource.url}
                     tags={tagsList}
                     onEdit={() => handleEdit(resource)}
-                    onDelete={() => handleDelete(resource.id)}
+                    onDelete={() => handleDeleteClick(resource.id)}
                   />
                 );
               })
@@ -143,6 +150,13 @@ function App() {
           );
         }}
         resourceToEdit={editingResource}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={resourceToDelete !== null}
+        onClose={() => setResourceToDelete(null)}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
       />
     </div>
   );
