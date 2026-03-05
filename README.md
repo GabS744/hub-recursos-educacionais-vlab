@@ -53,7 +53,7 @@ O projeto foi configurado com Docker para garantir que o ambiente rode perfeitam
 
 **1. Clone o repositório**
 git clone https://github.com/GabS744/hub-recursos-educacionais-vlab.git
-cd hub-recursos-educacionais
+cd hub-recursos-educacionais-vlab
 
 **2. Configure as Variáveis de Ambiente do Backend**
 Por questões de segurança, os arquivos .env não são versionados. Você deve criá-los a partir dos arquivos de exemplo disponíveis no projeto.
